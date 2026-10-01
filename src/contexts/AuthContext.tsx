@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../services/api';
 import { User, ApiResponse, LoginResponseData } from '../types/api';
@@ -21,13 +21,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     async function loadStorageData() {
       try {
         const storedToken = await AsyncStorage.getItem('@iot_token');
-        const storedUser = await AsyncStorage.getItem('@iot_user');
 
-        if (storedToken && storedUser) {
-          setUser(JSON.parse(storedUser));
+        if (storedToken) {
+          // Valida a sessão ativa contra o endpoint oficial atribuído
+          try {
+            const response = await api.get<ApiResponse<User>>('/auth/me');
+            setUser(response.data.data);
+            await AsyncStorage.setItem('@iot_user', JSON.stringify(response.data.data));
+          } catch {
+            // Fallback caso a API esteja inacessível: restaura do cache local
+            const storedUser = await AsyncStorage.getItem('@iot_user');
+            if (storedUser) {
+              setUser(JSON.parse(storedUser));
+            }
+          }
         }
       } catch (error) {
-        console.error('Falha ao restaurar sessão:', error);
+        console.error('Erro ao inicializar sessão:', error);
       } finally {
         setLoading(false);
       }
@@ -38,7 +48,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   async function signIn(email: string, password: string) {
     try {
-      // Chamada real ao endpoint oficial /api/v1/auth/login
       const response = await api.post<ApiResponse<LoginResponseData>>('/auth/login', {
         email,
         password,
@@ -51,14 +60,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       setUser(userData);
     } catch (error) {
-      // Fallback para desenvolvimento caso a API da Débora ainda esteja offline
       console.warn('API indisponível, utilizando mock temporário:', error);
 
       const mockUser: User = {
         id: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
-        name: 'Lucas Ramos',
+        name: 'USUARIO',
         email: email,
-        role: 'GESTOR',
+        role: 'CARGO USUARIO',
         receiveAlerts: true,
       };
       const mockToken = 'mock-jwt-token-xyz-123456';
@@ -81,3 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     </AuthContext.Provider>
   );
 };
+
+export function useAuth() {
+  return useContext(AuthContext);
+}
