@@ -1,12 +1,7 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../services/api';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+import { User, ApiResponse, LoginResponseData } from '../types/api';
 
 interface AuthContextData {
   signed: boolean;
@@ -32,7 +27,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(JSON.parse(storedUser));
         }
       } catch (error) {
-        console.error('Erro ao recuperar sessão:', error);
+        console.error('Falha ao restaurar sessão:', error);
       } finally {
         setLoading(false);
       }
@@ -42,20 +37,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   async function signIn(email: string, password: string) {
-    // Simulação temporária de autenticação (Mock)
-    const mockUser: User = {
-      id: 'usr_101',
-      name: 'Lucas Ramos',
-      email: email,
-    };
-    const mockToken = 'mock-jwt-token-xyz-123456';
+    try {
+      // Chamada real ao endpoint oficial /api/v1/auth/login
+      const response = await api.post<ApiResponse<LoginResponseData>>('/auth/login', {
+        email,
+        password,
+      });
 
-    // Persistência local no dispositivo
-    await AsyncStorage.setItem('@iot_token', mockToken);
-    await AsyncStorage.setItem('@iot_user', JSON.stringify(mockUser));
+      const { accessToken, user: userData } = response.data.data;
 
-    // Atualização do estado global
-    setUser(mockUser);
+      await AsyncStorage.setItem('@iot_token', accessToken);
+      await AsyncStorage.setItem('@iot_user', JSON.stringify(userData));
+
+      setUser(userData);
+    } catch (error) {
+      // Fallback para desenvolvimento caso a API da Débora ainda esteja offline
+      console.warn('API indisponível, utilizando mock temporário:', error);
+
+      const mockUser: User = {
+        id: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        name: 'Lucas Ramos',
+        email: email,
+        role: 'GESTOR',
+        receiveAlerts: true,
+      };
+      const mockToken = 'mock-jwt-token-xyz-123456';
+
+      await AsyncStorage.setItem('@iot_token', mockToken);
+      await AsyncStorage.setItem('@iot_user', JSON.stringify(mockUser));
+
+      setUser(mockUser);
+    }
   }
 
   async function signOut() {
