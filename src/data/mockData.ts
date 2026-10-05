@@ -1,4 +1,12 @@
-import type { Alert, Machine, MachineStatus } from '../types/models';
+import type {
+  Alert,
+  DashboardSummary,
+  Machine,
+  MachineStatus,
+  ProductionLine,
+  ProductionOrder,
+  ProductionTrendPoint,
+} from '../types/models';
 
 export const machines: Machine[] = [
   {
@@ -84,7 +92,86 @@ export const alerts: Alert[] = [
   },
 ];
 
-export const productionLines = Array.from(new Set(machines.map((machine) => machine.line))).map((line) => ({
-  title: line,
-  machines: machines.filter((machine) => machine.line === line),
-}));
+export const productionLines: ProductionLine[] = [
+  {
+    title: 'Linha de Estamparia',
+    machines: machines.filter((machine) => machine.line === 'Linha de Estamparia'),
+    operatorName: 'Marcos Lima',
+    operatorInitials: 'ML',
+    operatorRole: 'OPERADOR',
+    efficiency: 91,
+  },
+  {
+    title: 'Linha de Montagem',
+    machines: machines.filter((machine) => machine.line === 'Linha de Montagem'),
+    operatorName: 'Ana Costa',
+    operatorInitials: 'AC',
+    operatorRole: 'LIDER_OPERACAO',
+    efficiency: 86,
+  },
+  {
+    title: 'Linha de Qualidade',
+    machines: machines.filter((machine) => machine.line === 'Linha de Qualidade'),
+    operatorName: 'João Ferreira',
+    operatorInitials: 'JF',
+    operatorRole: 'TECNICO_MANUTENCAO',
+    efficiency: 94,
+  },
+];
+
+export const productionTrend: ProductionTrendPoint[] = [
+  { label: '06h', yield: 72, quality: 88, target: 82 },
+  { label: '08h', yield: 79, quality: 91, target: 83 },
+  { label: '10h', yield: 76, quality: 94, target: 84 },
+  { label: '12h', yield: 88, quality: 96, target: 85 },
+  { label: '14h', yield: 84, quality: 93, target: 86 },
+  { label: '16h', yield: 91, quality: 97, target: 87 },
+  { label: '18h', yield: 89, quality: 96, target: 88 },
+];
+
+export const activeOrders: ProductionOrder[] = [
+  {
+    code: 'OP-24081',
+    line: 'Estamparia',
+    operatorName: 'Marcos Lima',
+    operatorInitials: 'ML',
+    operatorRole: 'OPERADOR',
+    progress: 72,
+    due: '14:40',
+    status: 'IN_PROGRESS',
+  },
+  {
+    code: 'OP-24077',
+    line: 'Montagem',
+    operatorName: 'Ana Costa',
+    operatorInitials: 'AC',
+    operatorRole: 'LIDER_OPERACAO',
+    progress: 46,
+    due: '15:10',
+    status: 'IN_PROGRESS',
+  },
+  {
+    code: 'OP-24086',
+    line: 'Qualidade',
+    operatorName: 'João Ferreira',
+    operatorInitials: 'JF',
+    operatorRole: 'TECNICO_MANUTENCAO',
+    progress: 0,
+    due: '16:00',
+    status: 'PENDING',
+  },
+];
+
+export const dashboardSummary: DashboardSummary = {
+  indicators: {
+    oee: 85.8,
+    availability: 92.4,
+    performance: 94.1,
+    quality: 98.7,
+  },
+  machines,
+  alerts,
+  lines: productionLines,
+  productionTrend,
+  activeOrders,
+};

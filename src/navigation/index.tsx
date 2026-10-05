@@ -4,9 +4,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuth } from '../contexts/AuthContext';
 import { LoginScreen } from '../screens/auth/LoginScreen';
 import { ForgotPasswordScreen } from '../screens/auth/ForgotPasswordScreen';
-import { HomeScreen } from '../screens/HomeScreen';
+import { AppNavigator } from './AppNavigator';
+import type { AuthStackParamList } from './navigationTypes';
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export function Routes() {
   const { signed, loading } = useAuth();
@@ -19,16 +20,12 @@ export function Routes() {
     );
   }
 
+  if (signed) return <AppNavigator />;
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {signed ? (
-        <Stack.Screen name="Home" component={HomeScreen} />
-      ) : (
-        <>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-        </>
-      )}
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
     </Stack.Navigator>
   );
 }
