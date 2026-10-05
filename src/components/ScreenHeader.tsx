@@ -12,7 +12,11 @@ export function ScreenHeader({ eyebrow, title, subtitle, right }: { eyebrow?: st
         <Text style={styles.title}>{title}</Text>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       </View>
-      {right ?? <View style={styles.mark}><Feather name="activity" size={17} color={colors.green} /></View>}
+      {right ?? (
+        <View style={styles.mark}>
+          <Feather name="activity" size={17} color={colors.green} />
+        </View>
+      )}
     </View>
   );
 }

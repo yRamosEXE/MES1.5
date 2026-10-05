@@ -18,6 +18,7 @@ import type { MainTabParamList, RootStackParamList } from './navigationTypes';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tabs = createBottomTabNavigator<MainTabParamList>();
+
 function DashboardTab() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   return (
@@ -87,7 +88,15 @@ function MainTabs() {
 
 export function AppNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: colors.background }, headerTintColor: colors.textPrimary, headerTitleStyle: { ...typography.subtitle }, headerShadowVisible: false, contentStyle: { backgroundColor: colors.background } }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: colors.background },
+        headerTintColor: colors.textPrimary,
+        headerTitleStyle: { ...typography.subtitle },
+        headerShadowVisible: false,
+        contentStyle: { backgroundColor: colors.background },
+      }}
+    >
       <Stack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
       <Stack.Screen name="MachineDetail" component={MachineDetailScreen} options={{ title: 'Equipamento', headerBackTitle: 'Voltar' }} />
       <Stack.Screen name="ProfileModal" component={ProfileModal} options={{ presentation: 'transparentModal', headerShown: false, contentStyle: { backgroundColor: 'transparent' }, animation: 'slide_from_bottom' }} />

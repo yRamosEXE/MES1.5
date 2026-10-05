@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -66,9 +66,21 @@ export const AlertsFeedScreen = ({ onOpenMachine }: Props) => {
     <View style={styles.container}>
       <ScreenHeader title="Central de alertas" subtitle="Ocorrências e histórico industrial" />
       <View style={styles.viewSwitch}>
-        {([{ id: 'latest', label: 'Recentes' }, { id: 'history', label: 'Histórico' }] as const).map((item) => {
+        {([
+          { id: 'latest', label: 'Recentes' },
+          { id: 'history', label: 'Histórico' },
+        ] as const).map((item) => {
           const selected = feedView === item.id;
-          return <ScalePressable key={item.id} onPress={() => setFeedView(item.id)} style={[styles.viewButton, selected && styles.viewButtonSelected]} accessibilityLabel={`Abrir ${item.label} de alertas`}><Text style={[styles.viewText, selected && styles.viewTextSelected]}>{item.label}</Text></ScalePressable>;
+          return (
+            <ScalePressable
+              key={item.id}
+              onPress={() => setFeedView(item.id)}
+              style={[styles.viewButton, selected && styles.viewButtonSelected]}
+              accessibilityLabel={`Abrir ${item.label} de alertas`}
+            >
+              <Text style={[styles.viewText, selected && styles.viewTextSelected]}>{item.label}</Text>
+            </ScalePressable>
+          );
         })}
         <Text style={styles.alertCount}>{alerts.length} ocorrências</Text>
       </View>

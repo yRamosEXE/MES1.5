@@ -14,12 +14,17 @@ export function AlertCard({ alert, onPress, index = 0 }: Props) {
   const scale = useSharedValue(1);
   const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const accent = alert.severity === 'critical' ? colors.red : colors.amber;
+
   return (
     <AnimatedPressable
       accessibilityRole="button"
       onPress={() => onPress(alert.machineId)}
-      onPressIn={() => { scale.value = withSpring(0.97); }}
-      onPressOut={() => { scale.value = withSpring(1); }}
+      onPressIn={() => {
+        scale.value = withSpring(0.97);
+      }}
+      onPressOut={() => {
+        scale.value = withSpring(1);
+      }}
       entering={FadeInDown.delay(index * 100).duration(440)}
       style={[styles.card, pressStyle]}
     >
@@ -34,12 +39,34 @@ export function AlertCard({ alert, onPress, index = 0 }: Props) {
         </View>
         <Text style={styles.title}>{alert.title}</Text>
         <Text style={styles.description}>{alert.description}</Text>
-        <View style={styles.machineLine}><Feather name="settings" size={13} color={colors.textMuted} /><Text style={styles.machineName}>{alert.machineName}</Text><Text style={styles.separator}>·</Text><Text style={styles.lineName}>{alert.line}</Text></View>
+        <View style={styles.machineLine}>
+          <Feather name="settings" size={13} color={colors.textMuted} />
+          <Text style={styles.machineName}>{alert.machineName}</Text>
+          <Text style={styles.separator}>·</Text>
+          <Text style={styles.lineName}>{alert.line}</Text>
+        </View>
         <View style={styles.divider} />
         <View style={styles.assigneeRow}>
-          <View style={[styles.avatar, { backgroundColor: alert.technician.color }]}><Text style={styles.initials}>{alert.technician.initials}</Text></View>
-          <View style={styles.assigneeCopy}><Text style={styles.assigneeName}>{alert.technician.name}</Text><Text style={styles.role}>{alert.technician.role}</Text></View>
-          <View style={styles.acknowledgement}>{alert.acknowledged ? <><Feather name="check-circle" size={13} color={colors.green} /><Text style={styles.ackText}>Acionado</Text></> : <><Feather name="clock" size={13} color={colors.amber} /><Text style={[styles.ackText, { color: colors.amber }]}>Pendente</Text></>}</View>
+          <View style={[styles.avatar, { backgroundColor: alert.technician.color }]}>
+            <Text style={styles.initials}>{alert.technician.initials}</Text>
+          </View>
+          <View style={styles.assigneeCopy}>
+            <Text style={styles.assigneeName}>{alert.technician.name}</Text>
+            <Text style={styles.role}>{alert.technician.role}</Text>
+          </View>
+          <View style={styles.acknowledgement}>
+            {alert.acknowledged ? (
+              <>
+                <Feather name="check-circle" size={13} color={colors.green} />
+                <Text style={styles.ackText}>Acionado</Text>
+              </>
+            ) : (
+              <>
+                <Feather name="clock" size={13} color={colors.amber} />
+                <Text style={[styles.ackText, { color: colors.amber }]}>Pendente</Text>
+              </>
+            )}
+          </View>
         </View>
       </View>
     </AnimatedPressable>

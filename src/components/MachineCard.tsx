@@ -24,13 +24,15 @@ function MachineCardComponent({ machine, onPress, index = 0 }: Props) {
   const scale = useSharedValue(1);
   const radar = useSharedValue(0);
   const isOperating = machine.status === 'OPERANDO';
-  const statusColor = machine.status === 'OPERANDO'
-    ? colors.green
-    : machine.status === 'PARADA'
-      ? colors.red
-      : machine.status === 'MANUTENÇÃO'
-        ? colors.amber
-        : colors.slate;
+  const statusColor =
+    machine.status === 'OPERANDO'
+      ? colors.green
+      : machine.status === 'PARADA'
+        ? colors.red
+        : machine.status === 'MANUTENÇÃO'
+          ? colors.amber
+          : colors.slate;
+
   const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const radarStyle = useAnimatedStyle(() => ({
     opacity: 0.8 * (1 - radar.value),
@@ -51,22 +53,38 @@ function MachineCardComponent({ machine, onPress, index = 0 }: Props) {
       accessibilityRole="button"
       accessibilityLabel={`${machine.name}, status ${machine.status}`}
       onPress={() => onPress(machine.id)}
-      onPressIn={() => { scale.value = withSpring(0.97); }}
-      onPressOut={() => { scale.value = withSpring(1); }}
+      onPressIn={() => {
+        scale.value = withSpring(0.97);
+      }}
+      onPressOut={() => {
+        scale.value = withSpring(1);
+      }}
       entering={FadeInDown.delay(index * 100).duration(440)}
       style={[styles.card, pressStyle]}
     >
       <View style={styles.header}>
         <View style={styles.nameWrap}>
-          <View style={styles.machineIcon}><Feather name="settings" size={17} color={colors.textSecondary} /></View>
-          <Text style={styles.name} numberOfLines={1}>{machine.name}</Text>
+          <View style={styles.machineIcon}>
+            <Feather name="settings" size={17} color={colors.textSecondary} />
+          </View>
+          <Text style={styles.name} numberOfLines={1}>
+            {machine.name}
+          </Text>
         </View>
         <StatusBadge status={machine.status} compact />
       </View>
+
       <View style={styles.metaRow}>
-        <View style={styles.metaItem}><Feather name="layers" size={13} color={colors.textMuted} /><Text style={styles.metaText}>{machine.line}</Text></View>
-        <View style={styles.metaItem}><Feather name="cpu" size={13} color={colors.textMuted} /><Text style={styles.metaText}>{machine.sensorId}</Text></View>
+        <View style={styles.metaItem}>
+          <Feather name="layers" size={13} color={colors.textMuted} />
+          <Text style={styles.metaText}>{machine.line}</Text>
+        </View>
+        <View style={styles.metaItem}>
+          <Feather name="cpu" size={13} color={colors.textMuted} />
+          <Text style={styles.metaText}>{machine.sensorId}</Text>
+        </View>
       </View>
+
       <View style={styles.footer}>
         <View style={styles.signal}>
           <View style={styles.signalIndicator}>
