@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { memo, useCallback } from 'react';
-import { FlatList, ListRenderItem, StyleSheet, Text, View } from 'react-native';
+import { FlatList, ListRenderItem, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PieChart } from 'react-native-chart-kit';
 import { MachineCard } from '../components/MachineCard';
@@ -10,15 +10,31 @@ import { spacing } from '../theme/spacing';
 import { typography } from '../theme/typography';
 import { machines, productionLines, statusSummary } from '../data/mockData';
 import type { Machine } from '../types/models';
+import { useAuth } from '../contexts/AuthContext';
 
 type Props = { onOpenMachine: (machineId: string) => void };
-const chartData = statusSummary.map((item) => ({ name: item.status, population: item.value, color: item.color, legendFontColor: colors.textSecondary, legendFontSize: 11 }));
+
+const chartData = statusSummary.map((item) => ({
+  name: item.status,
+  population: item.value,
+  color: item.color,
+  legendFontColor: colors.textSecondary,
+  legendFontSize: 11,
+}));
 
 function LineGroup({ line, items, onPress }: { line: string; items: Machine[]; onPress: (id: string) => void }) {
   return (
     <View style={styles.group}>
-      <View style={styles.groupHeader}><View style={styles.groupTitleRow}><View style={styles.lineIndicator} /><Text style={styles.groupTitle}>{line}</Text></View><Text style={styles.count}>{String(items.length).padStart(2, '0')} EQUIP.</Text></View>
-      {items.map((machine) => <MachineCard key={machine.id} machine={machine} onPress={onPress} />)}
+      <View style={styles.groupHeader}>
+        <View style={styles.groupTitleRow}>
+          <View style={styles.lineIndicator} />
+          <Text style={styles.groupTitle}>{line}</Text>
+        </View>
+        <Text style={styles.count}>{String(items.length).padStart(2, '0')} EQUIP.</Text>
+      </View>
+      {items.map((machine) => (
+        <MachineCard key={machine.id} machine={machine} onPress={onPress} />
+      ))}
     </View>
   );
 }
@@ -26,28 +42,111 @@ function LineGroup({ line, items, onPress }: { line: string; items: Machine[]; o
 const LineGroupRow = memo(LineGroup);
 
 export function HomeScreen({ onOpenMachine }: Props) {
-  const renderLine: ListRenderItem<(typeof productionLines)[number]> = useCallback(({ item }) => <LineGroupRow line={item.title} items={item.machines} onPress={onOpenMachine} />, [onOpenMachine]);
+  const { user, signOut } = useAuth();
+
+  const renderLine: ListRenderItem<(typeof productionLines)[number]> = useCallback(
+    ({ item }) => <LineGroupRow line={item.title} items={item.machines} onPress={onOpenMachine} />,
+    [onOpenMachine],
+  );
 
   return (
     <SafeAreaView edges={['top']} style={styles.screen}>
-      <View style={styles.fixedHeader}><ScreenHeader eyebrow="TERÇA-FEIRA · TURNO A" title="Bom dia, Operações" right={<View style={styles.livePill}><View style={styles.liveDot} /><Text style={styles.liveText}>AO VIVO</Text></View>} /><Text style={styles.subheading}>Visão geral da planta industrial</Text></View>
+      <View style={styles.fixedHeader}>
+        <ScreenHeader
+          eyebrow="TERÇA-FEIRA · TURNO A"
+          title={`Olá, ${user?.name || 'Operações'}`}
+          right={
+            <TouchableOpacity onPress={signOut} style={styles.logoutButton}>
+              <Feather name="log-out" size={16} color={colors.red} />
+            </TouchableOpacity>
+          }
+        />
+        <Text style={styles.subheading}>Visão geral da planta industrial</Text>
+      </View>
+
       <FlatList
         data={productionLines}
         keyExtractor={(item) => item.title}
         renderItem={renderLine}
-        ListHeaderComponent={(
+        ListHeaderComponent={
           <View>
             <View style={styles.summaryCard}>
-              <View style={styles.summaryTop}><View><Text style={styles.cardEyebrow}>DISPONIBILIDADE DA PLANTA</Text><Text style={styles.summaryValue}>92,4<Text style={styles.percent}>%</Text></Text></View><View style={styles.summaryBadge}><Feather name="trending-up" size={13} color={colors.green} /><Text style={styles.summaryBadgeText}>+2,4%</Text></View></View>
-              <View style={styles.chartRow}>
-                <View style={styles.chartWrap}><PieChart data={chartData} width={166} height={146} chartConfig={{ color: () => colors.textSecondary }} accessor="population" backgroundColor="transparent" paddingLeft="22" hasLegend={false} center={[0, 0]} absolute={false} /></View>
-                <View style={styles.legend}>{statusSummary.map((item) => <View key={item.status} style={styles.legendRow}><View style={[styles.legendDot, { backgroundColor: item.color }]} /><View style={styles.legendCopy}><Text style={styles.legendLabel}>{item.status === 'OPERANDO' ? 'Operando' : item.status === 'PARADA' ? 'Parada' : 'Manutenção'}</Text><Text style={styles.legendCount}>{item.value}% da planta</Text></View></View>)}</View>
+              <View style={styles.summaryTop}>
+                <View>
+                  <Text style={styles.cardEyebrow}>DISPONIBILIDADE DA PLANTA</Text>
+                  <Text style={styles.summaryValue}>
+                    92,4<Text style={styles.percent}>%</Text>
+                  </Text>
+                </View>
+                <View style={styles.summaryBadge}>
+                  <Feather name="trending-up" size={13} color={colors.green} />
+                  <Text style={styles.summaryBadgeText}>+2,4%</Text>
+                </View>
               </View>
-              <View style={styles.summaryFooter}><View style={styles.footerMetric}><Text style={styles.footerNumber}>{machines.length}</Text><Text style={styles.footerLabel}>equipamentos</Text></View><View style={styles.metricDivider} /><View style={styles.footerMetric}><Text style={[styles.footerNumber, { color: colors.red }]}>{String(machines.filter((machine) => machine.status === 'PARADA').length).padStart(2, '0')}</Text><Text style={styles.footerLabel}>paradas ativas</Text></View><View style={styles.metricDivider} /><View style={styles.footerMetric}><Text style={[styles.footerNumber, { color: colors.slate }]}>{String(machines.filter((machine) => machine.status === 'OFFLINE').length).padStart(2, '0')}</Text><Text style={styles.footerLabel}>offline</Text></View></View>
+
+              <View style={styles.chartRow}>
+                <View style={styles.chartWrap}>
+                  <PieChart
+                    data={chartData}
+                    width={166}
+                    height={146}
+                    chartConfig={{ color: () => colors.textSecondary }}
+                    accessor="population"
+                    backgroundColor="transparent"
+                    paddingLeft="22"
+                    hasLegend={false}
+                    center={[0, 0]}
+                    absolute={false}
+                  />
+                </View>
+                <View style={styles.legend}>
+                  {statusSummary.map((item) => (
+                    <View key={item.status} style={styles.legendRow}>
+                      <View style={[styles.legendDot, { backgroundColor: item.color }]} />
+                      <View style={styles.legendCopy}>
+                        <Text style={styles.legendLabel}>
+                          {item.status === 'OPERANDO' ? 'Operando' : item.status === 'PARADA' ? 'Parada' : 'Manutenção'}
+                        </Text>
+                        <Text style={styles.legendCount}>{item.value}% da planta</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.summaryFooter}>
+                <View style={styles.footerMetric}>
+                  <Text style={styles.footerNumber}>{machines.length}</Text>
+                  <Text style={styles.footerLabel}>equipamentos</Text>
+                </View>
+                <View style={styles.metricDivider} />
+                <View style={styles.footerMetric}>
+                  <Text style={[styles.footerNumber, { color: colors.red }]}>
+                    {String(machines.filter((machine) => machine.status === 'PARADA').length).padStart(2, '0')}
+                  </Text>
+                  <Text style={styles.footerLabel}>paradas ativas</Text>
+                </View>
+                <View style={styles.metricDivider} />
+                <View style={styles.footerMetric}>
+                  <Text style={[styles.footerNumber, { color: colors.slate }]}>
+                    {String(machines.filter((machine) => machine.status === 'OFFLINE').length).padStart(2, '0')}
+                  </Text>
+                  <Text style={styles.footerLabel}>offline</Text>
+                </View>
+              </View>
             </View>
-            <View style={styles.sectionHeading}><View><Text style={styles.sectionTitle}>Equipamentos</Text><Text style={styles.sectionSub}>{machines.length} monitorados · atualização em tempo real</Text></View><View style={styles.filterButton}><Feather name="sliders" size={16} color={colors.textSecondary} /></View></View>
+
+            <View style={styles.sectionHeading}>
+              <View>
+                <Text style={styles.sectionTitle}>Equipamentos</Text>
+                <Text style={styles.sectionSub}>{machines.length} monitorados · atualização em tempo real</Text>
+              </View>
+              <View style={styles.filterButton}>
+                <Feather name="sliders" size={16} color={colors.textSecondary} />
+              </View>
+            </View>
           </View>
-        )}
+        }
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         initialNumToRender={4}
@@ -61,9 +160,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   fixedHeader: { paddingTop: spacing.md, paddingHorizontal: spacing.screenHorizontal, paddingBottom: spacing.md },
   subheading: { ...typography.body, color: colors.textSecondary, marginTop: 5 },
-  livePill: { flexDirection: 'row', alignItems: 'center', gap: 7, borderRadius: spacing.pill, paddingHorizontal: 10, paddingVertical: 8, backgroundColor: colors.greenBackground },
-  liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.green },
-  liveText: { ...typography.label, color: colors.green, fontSize: 9, letterSpacing: 0.8 },
+  logoutButton: { padding: 8, borderRadius: 8, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
   listContent: { paddingHorizontal: spacing.screenHorizontal, paddingBottom: 30 },
   summaryCard: { backgroundColor: colors.surface, borderRadius: spacing.radiusLg, borderWidth: 1, borderColor: colors.border, padding: spacing.lg, marginTop: spacing.sm },
   summaryTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
