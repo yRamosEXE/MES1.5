@@ -1,12 +1,11 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Lê do .env (EXPO_PUBLIC_API_URL). Se não existir, usa o fallback local.
 export const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || 'http://172.20.10.3:3000';
+  process.env.EXPO_PUBLIC_API_URL || 'https://keep-deck-coauthor.ngrok-free.dev/api/v1';
 
 export const api = axios.create({
-  baseURL: `${API_BASE_URL}/api/v1`,
+  baseURL: API_BASE_URL,
   timeout: 10000,
 });
 

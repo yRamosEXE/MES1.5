@@ -1,25 +1,20 @@
 {
   "expo": {
-    "name": "MES1.5_parte_mobile",
-    "slug": "MES1.5_parte_mobile",
+    "name": "MES 1.5 Mobile",
+    "slug": "mes-1-5-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true
     },
     "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
-      },
-      "predictiveBackGestureEnabled": false
+      "package": "com.graest.mesmobile"
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
+    "extra": {
+      "eas": {
+        "projectId": "4f1a90a4-400a-4236-9fd5-4ccb2d3ccd4d"
+      }
     }
   }
 }

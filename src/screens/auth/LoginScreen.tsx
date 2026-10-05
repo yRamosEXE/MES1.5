@@ -7,8 +7,14 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  Linking,
 } from 'react-native';
 import { AuthContext } from '../../contexts/AuthContext';
+
+// Lê a URL configurada no .env ou recorre ao domínio padrão
+const WEB_REGISTER_URL =
+  process.env.EXPO_PUBLIC_WEB_REGISTER_URL ||
+  'https://keep-deck-coauthor.ngrok-free.dev/cadastro';
 
 export function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
@@ -33,10 +39,23 @@ export function LoginScreen({ navigation }: any) {
     }
   }
 
+  async function handleOpenWebRegister() {
+    try {
+      const supported = await Linking.canOpenURL(WEB_REGISTER_URL);
+      if (supported) {
+        await Linking.openURL(WEB_REGISTER_URL);
+      } else {
+        Alert.alert('Erro', 'Não foi possível abrir o navegador padrão.');
+      }
+    } catch (err) {
+      Alert.alert('Erro', 'Ocorreu uma falha ao redirecionar para o portal web.');
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Monitoramento IoT</Text>
-      <Text style={styles.subtitle}>Aceda à sua conta para acompanhar as máquinas</Text>
+      <Text style={styles.subtitle}>Acesse à sua conta para acompanhar as máquinas</Text>
 
       <TextInput
         style={styles.input}
@@ -50,7 +69,7 @@ export function LoginScreen({ navigation }: any) {
 
       <TextInput
         style={styles.input}
-        placeholder="Palavra-passe"
+        placeholder="Senha"
         placeholderTextColor="#9ca3af"
         secureTextEntry
         value={password}
@@ -73,8 +92,16 @@ export function LoginScreen({ navigation }: any) {
         style={styles.linkButton}
         onPress={() => navigation.navigate('ForgotPassword')}
       >
-        <Text style={styles.linkText}>Esqueceu-se da palavra-passe?</Text>
+        <Text style={styles.linkText}>Esqueceu a Senha?</Text>
       </TouchableOpacity>
+
+      {/* Redirecionamento para cadastro web corporativo */}
+      <View style={styles.webRegisterContainer}>
+        <Text style={styles.webRegisterLabel}>Ainda não tem acesso corporativo?</Text>
+        <TouchableOpacity onPress={handleOpenWebRegister} activeOpacity={0.7}>
+          <Text style={styles.webRegisterLink}>Cadastre-se na Plataforma Web</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -129,5 +156,23 @@ const styles = StyleSheet.create({
   linkText: {
     color: '#38bdf8',
     fontSize: 14,
+  },
+  webRegisterContainer: {
+    marginTop: 36,
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#1e293b',
+    paddingTop: 24,
+  },
+  webRegisterLabel: {
+    color: '#64748b',
+    fontSize: 13,
+    marginBottom: 6,
+  },
+  webRegisterLink: {
+    color: '#38bdf8',
+    fontSize: 14,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });

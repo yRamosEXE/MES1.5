@@ -51,33 +51,26 @@ npm install -g expo-cli eas-cli
 
 Expo Go instalado no smartphone (disponível na Google Play Store e Apple App Store) para testes rápidos durante o desenvolvimento.
 
-🔐 Configuração das Variáveis de Ambiente (.env)
+### ⚙️ Configuração das Variáveis de Ambiente
 
-O projeto utiliza variáveis de ambiente com o prefixo EXPO_PUBLIC_ para apontar dinamicamente para o backend NestJS sem expor credenciais em commits públicos.
+Crie um arquivo `.env` na raiz do projeto (ou copie de `.env.example`):
 
-1. Criar o arquivo .env
-
-Na raiz do projeto, crie uma cópia do modelo .env.example:
-
+```bash
 cp .env.example .env
 
+Preencha as variáveis com os endereços da infraestrutura:
 
-2. Definir o Endpoint da API
+# URL base da API NestJS (via ngrok estático ou rede local)
+EXPO_PUBLIC_API_URL=[https://keep-deck-coauthor.ngrok-free.dev/api/v1](https://keep-deck-coauthor.ngrok-free.dev/api/v1)
 
-Abra o arquivo .env gerado e ajuste o endereço para a máquina ou servidor que hospeda a API NestJS:
-
-# Exemplo para testes na mesma rede Wi-Fi local:
-EXPO_PUBLIC_API_URL=http://10.10.21.72:3000/api/v1
-
-# Exemplo com IP ou Domínio fixado pela infraestrutura:
-# EXPO_PUBLIC_API_URL=https://api.mes.suaempresa.com/api/v1
-
+# URL da plataforma Web para solicitação e cadastro de acesso
+EXPO_PUBLIC_WEB_REGISTER_URL=[https://keep-deck-coauthor.ngrok-free.dev/cadastro](https://keep-deck-coauthor.ngrok-free.dev/cadastro)
 
 Atenção:
 
 O arquivo .env real nunca deve ser versionado no Git (ele já está listado no .gitignore).
 
-Se estiver testando localmente com o backend no seu computador e o app no celular, ambos precisam estar conectados na mesma rede Wi-Fi.
+Se estiver testando localmente com o backend no seu computador e o app no celular, ambos precisam estar conectados na mesma rede Wi-Fi (ou utilizando a URL estática do Ngrok para acesso externo).
 
 🚀 Como Executar o Projeto Localmente
 
@@ -85,11 +78,9 @@ Instale as dependências:
 
 npm install
 
-
 Inicie o servidor de desenvolvimento Metro Bundler:
 
 npx expo start --host lan -c
-
 
 Abrir o aplicativo:
 
@@ -103,48 +94,52 @@ No Simulador iOS (macOS): Pressione a tecla i no terminal.
 
 Para rodar o aplicativo de forma nativa e independente em aparelhos Android (sem precisar abrir o Expo Go), utilizamos o EAS Build.
 
-1. Autenticar no EAS
+    Autenticar no EAS
 
 Faça login com a sua conta da Expo no terminal:
 
 eas login
 
+    Definir Variáveis de Ambiente no EAS (Nuvem)
 
-2. Verificar a Configuração de Build (eas.json)
+Como o arquivo .env não é enviado para o repositório remoto, configure as variáveis diretamente no EAS para que o build na nuvem tenha acesso a elas:
+
+eas env:set preview --name EXPO_PUBLIC_API_URL --value https://keep-deck-coauthor.ngrok-free.dev/api/v1 --type string
+eas env:set preview --name EXPO_PUBLIC_WEB_REGISTER_URL --value https://keep-deck-coauthor.ngrok-free.dev/cadastro --type string
+
+    Verificar a Configuração de Build (eas.json)
 
 Certifique-se de que o arquivo eas.json na raiz contém o profile preview configurado para gerar apk:
 
 {
-  "cli": {
-    "version": ">= 15.0.0",
-    "appVersionSource": "remote"
-  },
-  "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal"
-    },
-    "preview": {
-      "distribution": "internal",
-      "android": {
-        "buildType": "apk"
-      }
-    },
-    "production": {
-      "autoIncrement": true
-    }
-  }
+"cli": {
+"version": ">= 15.0.0",
+"appVersionSource": "remote"
+},
+"build": {
+"development": {
+"developmentClient": true,
+"distribution": "internal"
+},
+"preview": {
+"distribution": "internal",
+"android": {
+"buildType": "apk"
+}
+},
+"production": {
+"autoIncrement": true
+}
+}
 }
 
-
-3. Disparar a Compilação do APK
+    Disparar a Compilação do APK
 
 Execute o comando de build na nuvem:
 
 eas build -p android --profile preview
 
-
-4. Instalação do APK
+    Instalação do APK
 
 Ao concluir a compilação, o terminal exibirá uma URL de download e um QR Code.
 
@@ -153,6 +148,8 @@ Abra o link ou escaneie o QR Code em qualquer dispositivo Android para fazer o d
 No Android, autorize a instalação de aplicativos de fontes externas quando solicitado e conclua a instalação.
 
 📡 Resiliência e Comportamento Offline
+
+Redirecionamento para Cadastro Web: O cadastro de novos usuários é centralizado na aplicação web corporativa; na tela de login, o usuário é redirecionado nativamente ao navegador padrão para solicitar acesso.
 
 Persistência de Sessão: Ao realizar login com sucesso, o token JWT e os dados cadastrais do operador são salvos no AsyncStorage.
 
