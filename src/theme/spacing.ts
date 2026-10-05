@@ -5,6 +5,8 @@ export const spacing = {
   lg: 16,
   xl: 20,
   xxl: 24,
+  medium: 16,
+  large: 24,
   section: 28,
   screenHorizontal: 20,
   radiusSm: 8,

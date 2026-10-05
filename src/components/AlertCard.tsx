@@ -1,14 +1,33 @@
 import { Feather } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
 import { typography } from '../theme/typography';
 import type { Alert } from '../types/models';
 
-export function AlertCard({ alert, onPress }: { alert: Alert; onPress: (machineId: string) => void }) {
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+type Props = { alert: Alert; onPress: (machineId: string) => void; index?: number };
+
+export function AlertCard({ alert, onPress, index = 0 }: Props) {
+  const scale = useSharedValue(1);
+  const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const accent = alert.severity === 'critical' ? colors.red : colors.amber;
+
   return (
-    <Pressable onPress={() => onPress(alert.machineId)} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
+    <AnimatedPressable
+      accessibilityRole="button"
+      onPress={() => onPress(alert.machineId)}
+      onPressIn={() => {
+        scale.value = withSpring(0.97);
+      }}
+      onPressOut={() => {
+        scale.value = withSpring(1);
+      }}
+      entering={FadeInDown.delay(index * 100).duration(440)}
+      style={[styles.card, pressStyle]}
+    >
       <View style={[styles.accent, { backgroundColor: accent }]} />
       <View style={styles.content}>
         <View style={styles.topline}>
@@ -20,21 +39,42 @@ export function AlertCard({ alert, onPress }: { alert: Alert; onPress: (machineI
         </View>
         <Text style={styles.title}>{alert.title}</Text>
         <Text style={styles.description}>{alert.description}</Text>
-        <View style={styles.machineLine}><Feather name="settings" size={13} color={colors.textMuted} /><Text style={styles.machineName}>{alert.machineName}</Text><Text style={styles.separator}>·</Text><Text style={styles.lineName}>{alert.line}</Text></View>
+        <View style={styles.machineLine}>
+          <Feather name="settings" size={13} color={colors.textMuted} />
+          <Text style={styles.machineName}>{alert.machineName}</Text>
+          <Text style={styles.separator}>·</Text>
+          <Text style={styles.lineName}>{alert.line}</Text>
+        </View>
         <View style={styles.divider} />
         <View style={styles.assigneeRow}>
-          <View style={[styles.avatar, { backgroundColor: alert.technician.color }]}><Text style={styles.initials}>{alert.technician.initials}</Text></View>
-          <View style={styles.assigneeCopy}><Text style={styles.assigneeName}>{alert.technician.name}</Text><Text style={styles.role}>{alert.technician.role}</Text></View>
-          <View style={styles.acknowledgement}>{alert.acknowledged ? <><Feather name="check-circle" size={13} color={colors.green} /><Text style={styles.ackText}>Acionado</Text></> : <><Feather name="clock" size={13} color={colors.amber} /><Text style={[styles.ackText, { color: colors.amber }]}>Pendente</Text></>}</View>
+          <View style={[styles.avatar, { backgroundColor: alert.technician.color }]}>
+            <Text style={styles.initials}>{alert.technician.initials}</Text>
+          </View>
+          <View style={styles.assigneeCopy}>
+            <Text style={styles.assigneeName}>{alert.technician.name}</Text>
+            <Text style={styles.role}>{alert.technician.role}</Text>
+          </View>
+          <View style={styles.acknowledgement}>
+            {alert.acknowledged ? (
+              <>
+                <Feather name="check-circle" size={13} color={colors.green} />
+                <Text style={styles.ackText}>Acionado</Text>
+              </>
+            ) : (
+              <>
+                <Feather name="clock" size={13} color={colors.amber} />
+                <Text style={[styles.ackText, { color: colors.amber }]}>Pendente</Text>
+              </>
+            )}
+          </View>
         </View>
       </View>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
 const styles = StyleSheet.create({
   card: { flexDirection: 'row', overflow: 'hidden', borderRadius: spacing.radius, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, marginBottom: spacing.md },
-  pressed: { opacity: 0.86 },
   accent: { width: 4 },
   content: { flex: 1, padding: spacing.lg },
   topline: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
