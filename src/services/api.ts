@@ -1,8 +1,7 @@
 ﻿import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// IMPORTANTE: Substitua '192.168.1.100' pelo IP local da sua máquina (veja no ipconfig)
-export const API_BASE_URL = 'http://192.168.1.100:3000/api/v1';
+export const API_BASE_URL = 'http://10.10.21.69:3000/api/v1';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -12,7 +11,6 @@ export const api = axios.create({
   },
 });
 
-// Interceptor para injetar o Token JWT enviado pela Auth do Lucas
 api.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem('@MES:token');
@@ -24,7 +22,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Interceptor para tratar o envelope oficial da API NestJS { success, data, message }
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
