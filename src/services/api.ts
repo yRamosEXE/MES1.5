@@ -1,8 +1,9 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Substitua pelo IP da máquina servidora na sua rede local
-export const API_BASE_URL = 'http://172.20.10.3:3000';
+// Lê do .env (EXPO_PUBLIC_API_URL). Se não existir, usa o fallback local.
+export const API_BASE_URL =
+  process.env.EXPO_PUBLIC_API_URL || 'http://172.20.10.3:3000';
 
 export const api = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,
