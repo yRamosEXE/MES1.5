@@ -41,7 +41,7 @@ export function LoginScreen({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Monitoramento IoT</Text>
-      <Text style={styles.subtitle}>Aceda à sua conta para acompanhar as máquinas</Text>
+      <Text style={styles.subtitle}>Acesse à sua conta para acompanhar as máquinas</Text>
 
       <TextInput
         style={styles.input}
@@ -55,7 +55,7 @@ export function LoginScreen({ navigation }: Props) {
 
       <TextInput
         style={styles.input}
-        placeholder="Palavra-passe"
+        placeholder="Senha"
         placeholderTextColor="#9ca3af"
         secureTextEntry
         value={password}
@@ -80,7 +80,7 @@ export function LoginScreen({ navigation }: Props) {
         onPress={() => navigation.navigate('ForgotPassword')}
         accessibilityLabel="Recuperar senha"
       >
-        <Text style={styles.linkText}>Esqueceu-se da palavra-passe?</Text>
+        <Text style={styles.linkText}>Esqueceu a Senha?</Text>
       </ScalePressable>
     </View>
   );
