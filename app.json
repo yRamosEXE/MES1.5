@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "MES1.5_parte_mobile",
-    "slug": "MES1.5_parte_mobile",
+    "name": "MES 1.5",
+    "slug": "mes1-5-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -11,10 +11,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#111f42"
       },
       "predictiveBackGestureEnabled": false
     },
