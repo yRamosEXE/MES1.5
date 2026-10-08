@@ -9,7 +9,11 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.graest.mesmobile"
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#111f42"
+      },
+      "predictiveBackGestureEnabled": false
     },
     "extra": {
       "eas": {
