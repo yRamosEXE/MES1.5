@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { api } from '../../services/api';
 import { ApiResponse } from '../../types/api';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { AuthStackParamList } from '../../navigation/navigationTypes';
+import { ScalePressable } from '../../components/ui/ScalePressable';
+import { colors } from '../../theme/colors';
 
-export function ForgotPasswordScreen({ navigation }: any) {
+type Props = NativeStackScreenProps<AuthStackParamList, 'ForgotPassword'>;
+
+export function ForgotPasswordScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -18,8 +24,12 @@ export function ForgotPasswordScreen({ navigation }: any) {
       await api.post<ApiResponse<null>>('/auth/forgot-password', { email });
       Alert.alert('Sucesso', 'Instruções de recuperação foram enviadas para o seu e-mail.');
       navigation.goBack();
-    } catch (error: any) {
-      const msg = error.response?.data?.error?.message || 'Falha ao solicitar recuperação.';
+    } catch (error: unknown) {
+      const response = error && typeof error === 'object' && 'response' in error
+        ? (error as { response?: { data?: { error?: { message?: unknown } } } }).response
+        : undefined;
+      const apiMessage = response?.data?.error?.message;
+      const msg = typeof apiMessage === 'string' ? apiMessage : 'Falha ao solicitar recuperação.';
       Alert.alert('Erro', msg);
     } finally {
       setSubmitting(false);
@@ -41,24 +51,24 @@ export function ForgotPasswordScreen({ navigation }: any) {
         onChangeText={setEmail}
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleResetPassword} disabled={submitting}>
+      <ScalePressable style={styles.button} onPress={handleResetPassword} disabled={submitting} accessibilityLabel="Enviar recuperação de senha">
         {submitting ? <ActivityIndicator color="#ffffff" /> : <Text style={styles.buttonText}>Enviar</Text>}
-      </TouchableOpacity>
+      </ScalePressable>
 
-      <TouchableOpacity style={styles.linkButton} onPress={() => navigation.goBack()}>
+      <ScalePressable style={styles.linkButton} onPress={() => navigation.goBack()} accessibilityLabel="Voltar ao login">
         <Text style={styles.linkText}>Voltar ao Login</Text>
-      </TouchableOpacity>
+      </ScalePressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f172a', justifyContent: 'center', paddingHorizontal: 24 },
-  title: { fontSize: 24, fontWeight: 'bold', color: '#ffffff', textAlign: 'center', marginBottom: 8 },
-  subtitle: { fontSize: 14, color: '#94a3b8', textAlign: 'center', marginBottom: 28 },
-  input: { backgroundColor: '#1e293b', color: '#ffffff', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 14, fontSize: 16, marginBottom: 16, borderWidth: 1, borderColor: '#334155' },
-  button: { backgroundColor: '#2563eb', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: 8 },
-  buttonText: { color: '#ffffff', fontSize: 16, fontWeight: 'bold' },
+  container: { flex: 1, backgroundColor: colors.background, justifyContent: 'center', paddingHorizontal: 24 },
+  title: { fontSize: 24, fontWeight: 'bold', color: colors.textPrimary, textAlign: 'center', marginBottom: 8 },
+  subtitle: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginBottom: 28 },
+  input: { backgroundColor: colors.surface, color: colors.textPrimary, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 14, fontSize: 16, marginBottom: 16, borderWidth: 1, borderColor: colors.border },
+  button: { backgroundColor: colors.green, borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: 8 },
+  buttonText: { color: colors.background, fontSize: 16, fontWeight: 'bold' },
   linkButton: { marginTop: 20, alignItems: 'center' },
-  linkText: { color: '#38bdf8', fontSize: 14 },
+  linkText: { color: colors.green, fontSize: 14 },
 });

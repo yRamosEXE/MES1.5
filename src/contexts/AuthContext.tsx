@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         id: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
         name: 'USUARIO',
         email: email,
-        role: 'CARGO USUARIO',
+        role: 'OPERADOR',
         receiveAlerts: true,
       };
       const mockToken = 'mock-jwt-token-xyz-123456';
