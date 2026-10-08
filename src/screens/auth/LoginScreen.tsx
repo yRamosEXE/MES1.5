@@ -100,7 +100,7 @@ export function LoginScreen({ navigation }: Props) {
         onPress={() => navigation.navigate('ForgotPassword')}
         accessibilityLabel="Recuperar senha"
       >
-        <Text style={styles.linkText}>Esqueceu-se da palavra-passe?</Text>
+        <Text style={styles.linkText}>Esqueceu a Senha?</Text>
       </ScalePressable>
 
       {/* Redirecionamento para cadastro web corporativo */}
