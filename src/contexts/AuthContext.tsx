@@ -11,6 +11,9 @@ interface AuthContextData {
   signOut: () => Promise<void>;
 }
 
+// O interceptor do axios (services/api.ts) já devolve o body do envelope { success, data }.
+const unwrap = <T,>(body: unknown) => (body as ApiResponse<T>).data;
+
 export const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -20,17 +23,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     async function loadStorageData() {
       try {
-        const storedToken = await AsyncStorage.getItem('@iot_token');
+        const storedToken = await AsyncStorage.getItem('@MES:token');
 
         if (storedToken) {
           // Valida a sessão ativa contra o endpoint oficial atribuído
           try {
-            const response = await api.get<ApiResponse<User>>('/auth/me');
-            setUser(response.data.data);
-            await AsyncStorage.setItem('@iot_user', JSON.stringify(response.data.data));
+            const me = unwrap<User>(await api.get('/auth/me'));
+            setUser(me);
+            await AsyncStorage.setItem('@MES:user', JSON.stringify(me));
           } catch {
             // Fallback caso a API esteja inacessível: restaura do cache local
-            const storedUser = await AsyncStorage.getItem('@iot_user');
+            const storedUser = await AsyncStorage.getItem('@MES:user');
             if (storedUser) {
               setUser(JSON.parse(storedUser));
             }
@@ -48,15 +51,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   async function signIn(email: string, password: string) {
     try {
-      const response = await api.post<ApiResponse<LoginResponseData>>('/auth/login', {
-        email,
-        password,
-      });
+      const { accessToken, user: userData } = unwrap<LoginResponseData>(
+        await api.post('/auth/login', { email, password })
+      );
 
-      const { accessToken, user: userData } = response.data.data;
-
-      await AsyncStorage.setItem('@iot_token', accessToken);
-      await AsyncStorage.setItem('@iot_user', JSON.stringify(userData));
+      await AsyncStorage.setItem('@MES:token', accessToken);
+      await AsyncStorage.setItem('@MES:user', JSON.stringify(userData));
 
       setUser(userData);
     } catch (error) {
@@ -71,15 +71,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       };
       const mockToken = 'mock-jwt-token-xyz-123456';
 
-      await AsyncStorage.setItem('@iot_token', mockToken);
-      await AsyncStorage.setItem('@iot_user', JSON.stringify(mockUser));
+      await AsyncStorage.setItem('@MES:token', mockToken);
+      await AsyncStorage.setItem('@MES:user', JSON.stringify(mockUser));
 
       setUser(mockUser);
     }
   }
 
   async function signOut() {
-    await AsyncStorage.multiRemove(['@iot_token', '@iot_user']);
+    await AsyncStorage.multiRemove(['@MES:token', '@MES:user']);
     setUser(null);
   }
 

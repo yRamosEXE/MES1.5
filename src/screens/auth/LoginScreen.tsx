@@ -18,7 +18,7 @@ import { colors } from '../../theme/colors';
 // Lê a URL configurada no .env ou recorre ao domínio padrão
 const WEB_REGISTER_URL =
   process.env.EXPO_PUBLIC_WEB_REGISTER_URL ||
-  'https://keep-deck-coauthor.ngrok-free.dev/cadastro';
+  'https://keep-deck-coauthor.ngrok-free.dev/request-access';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
