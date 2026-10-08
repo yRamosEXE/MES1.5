@@ -1,20 +1,55 @@
+import React, { useCallback, useEffect, useState } from 'react';
+import { View } from 'react-native';
+import * as SplashScreen from 'expo-splash-screen';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
+import { AuthProvider, useAuth } from './src/contexts/AuthContext';
+import { Routes } from './src/navigation';
+import { OfflineBanner } from './src/components/OfflineBanner';
+import { AnimatedSplash } from './src/components/AnimatedSplash';
 
-export default function App() {
+// Mantém a splash nativa visível até a splash animada estar desenhada.
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
+
+// Tempo mínimo para a animação de entrada não "piscar" em sessões rápidas.
+const MIN_SPLASH_MS = 1200;
+
+function AppContent() {
+  const { loading } = useAuth();
+  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
+  const [splashVisible, setSplashVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMinTimeElapsed(true), MIN_SPLASH_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleSplashFinish = useCallback(() => setSplashVisible(false), []);
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
+    <View style={{ flex: 1 }}>
+      <StatusBar style="light" />
+      <OfflineBanner />
+      <Routes />
+      {splashVisible && (
+        <AnimatedSplash ready={!loading && minTimeElapsed} onFinish={handleSplashFinish} />
+      )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default function App() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
+  );
+}
