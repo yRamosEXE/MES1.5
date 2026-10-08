@@ -6,12 +6,19 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  Linking,
+  TouchableOpacity,
 } from 'react-native';
 import { AuthContext } from '../../contexts/AuthContext';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../../navigation/navigationTypes';
 import { ScalePressable } from '../../components/ui/ScalePressable';
 import { colors } from '../../theme/colors';
+
+// Lê a URL configurada no .env ou recorre ao domínio padrão
+const WEB_REGISTER_URL =
+  process.env.EXPO_PUBLIC_WEB_REGISTER_URL ||
+  'https://keep-deck-coauthor.ngrok-free.dev/cadastro';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -38,10 +45,23 @@ export function LoginScreen({ navigation }: Props) {
     }
   }
 
+  async function handleOpenWebRegister() {
+    try {
+      const supported = await Linking.canOpenURL(WEB_REGISTER_URL);
+      if (supported) {
+        await Linking.openURL(WEB_REGISTER_URL);
+      } else {
+        Alert.alert('Erro', 'Não foi possível abrir o navegador padrão.');
+      }
+    } catch {
+      Alert.alert('Erro', 'Ocorreu uma falha ao redirecionar para o portal web.');
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Monitoramento IoT</Text>
-      <Text style={styles.subtitle}>Aceda à sua conta para acompanhar as máquinas</Text>
+      <Text style={styles.subtitle}>Acesse à sua conta para acompanhar as máquinas</Text>
 
       <TextInput
         style={styles.input}
@@ -55,7 +75,7 @@ export function LoginScreen({ navigation }: Props) {
 
       <TextInput
         style={styles.input}
-        placeholder="Palavra-passe"
+        placeholder="Senha"
         placeholderTextColor="#9ca3af"
         secureTextEntry
         value={password}
@@ -82,6 +102,14 @@ export function LoginScreen({ navigation }: Props) {
       >
         <Text style={styles.linkText}>Esqueceu-se da palavra-passe?</Text>
       </ScalePressable>
+
+      {/* Redirecionamento para cadastro web corporativo */}
+      <View style={styles.webRegisterContainer}>
+        <Text style={styles.webRegisterLabel}>Ainda não tem acesso corporativo?</Text>
+        <TouchableOpacity onPress={handleOpenWebRegister} activeOpacity={0.7}>
+          <Text style={styles.webRegisterLink}>Cadastre-se na Plataforma Web</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -136,5 +164,23 @@ const styles = StyleSheet.create({
   linkText: {
     color: colors.green,
     fontSize: 14,
+  },
+  webRegisterContainer: {
+    marginTop: 36,
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#1e293b',
+    paddingTop: 24,
+  },
+  webRegisterLabel: {
+    color: '#64748b',
+    fontSize: 13,
+    marginBottom: 6,
+  },
+  webRegisterLink: {
+    color: '#38bdf8',
+    fontSize: 14,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });
